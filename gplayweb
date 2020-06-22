@@ -1,9 +1,10 @@
-#! /usr/bin/python2
+#! /usr/bin/python3
 # -*- coding: utf-8 -*-
-import sys, os, traceback, ConfigParser, argparse, multiprocessing
+import sys, os, traceback, configparser, argparse, multiprocessing
 import tornado.ioloop, tornado.web
 import pkg_resources
 from gplaycli.gplaycli import GPlaycli
+from gplaycli.util import list_folder_apks
 from subprocess import Popen, PIPE
 import os.path
 
@@ -71,13 +72,13 @@ class MainHandler(tornado.web.RequestHandler):
 	# Core
 	# Show the list of downloaded apks
 	def list(self):
-		results = self.cli.list_folder_apks(self.apk_folder)
+		results = list_folder_apks(self.apk_folder)
 		cached_infos = self.get_infos(results)
 		self.render('list', cached_infos)
 
 	# ask gplay api if infos are not cached
 	def get_infos(self, apks):
-		apks = map(self.kick_extension, apks)
+		apks = list(map(self.kick_extension, apks))
 		separator = ";"
 		# Ensure the cache file exists
 		open(self.cache_file,'a+')
@@ -219,7 +220,7 @@ def fdroid_init(fdroid_exec, fdroid_repo_dir):
 		if process.returncode != 0:
 			sys.stderr.write("error while initializing fdroid repository " + stderr)
 		else:
-			print("fdroid repository initialized successfully in " + fdroid_repo_dir)
+			print(("fdroid repository initialized successfully in " + fdroid_repo_dir))
 	except:
 		traceback.print_exc(file=sys.stdout)
 
@@ -233,12 +234,12 @@ def main():
 						default="/etc/gplayweb/gplayweb.conf",
 			help="Use a different config file than /etc/gplayweb/gplayweb.conf")
 	cli_args = parser.parse_args()
-	configparser = ConfigParser.ConfigParser()
-	configparser.read(cli_args.CONFFILE)
+	parser = configparser.ConfigParser()
+	parser.read(cli_args.CONFFILE)
 	try:
-		config_list = configparser.items("Server")
-	except ConfigParser.NoSectionError:
-		print("Error: [Server] section not found. Please make sure "+cli_args.CONFFILE+" exists and contains a [Server] section")
+		config_list = parser.items("Server")
+	except parser.NoSectionError:
+		print(("Error: [Server] section not found. Please make sure "+cli_args.CONFFILE+" exists and contains a [Server] section"))
 		sys.exit(1)
 
 	# Get default params
@@ -250,7 +251,7 @@ def main():
 	status, errorString = check_config(config)
 	# If something went wrong
 	if not status:
-		print errorString
+		print(errorString)
 		return
 
 	static_path = "/usr/share/gplayweb/static" if os.path.isdir("/usr/share/gplayweb/static") else os.path.join(os.path.dirname(__file__), "static")
@@ -269,15 +270,15 @@ def main():
 	],**settings)
 
 	# Parsing conffile
-	cli = GPlaycli(cli_args.CONFFILE)
+	cli = GPlaycli(config_file=cli_args.CONFFILE)
 	# Connect to API
-	cli.connect_to_googleplay_api()
+	cli.connect()
 
 	# init fdroid repository, if necessary
 	if 'fdroid_exec' in config:
 		fdroid_init(config['fdroid_exec'], config['fdroid_repo_dir'])
 
-	print("starting gplayweb server, listening on " + settings['ip'] + ":"+ settings['port'])
+	print(("starting gplayweb server, listening on " + settings['ip'] + ":"+ settings['port']))
 
 	application.listen(settings['port'],settings['ip'])
 	tornado.ioloop.IOLoop.current().start()

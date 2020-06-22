@@ -17,20 +17,12 @@ RUN apt-get update && apt-get install -y \
 	libssl-dev \
 	libjpeg-dev \
 	python-dev \
-	python-pip \
 	python3 \
 	python3-pip \
 	openjdk-8-jdk \
 	virtualenv \
 	wget \
 	zlib1g-dev
-
-RUN mkdir -p /data/fdroid/repo
-
-# Install gplayweb
-RUN git clone https://github.com/fxaguessy/gplayweb.git /opt/gplayweb
-WORKDIR /opt/gplayweb
-RUN pip install -r requirements.txt
 
 # Install Android SDK and build tools 22
 WORKDIR /opt/
@@ -41,9 +33,18 @@ RUN wget https://dl.google.com/android/android-sdk_r24.3.4-linux.tgz \
 
 ENV ANDROID_HOME=/opt/android-sdk-linux
 ENV PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
-RUN echo 'y' | android update sdk --no-ui -a --filter platform-tools,build-tools-22.0.1,android-22
+RUN yes | android update sdk --no-ui -a --filter platform-tools,build-tools-22.0.1,android-22
+
+RUN mkdir -p /data/fdroid/repo
+RUN mkdir -p /etc/gplaycli
+
+# Install gplayweb
+ADD . /opt/gplayweb
+WORKDIR /opt/gplayweb
+RUN pip3 install -r requirements.txt
 
 COPY ./gplayweb.conf.example /etc/gplayweb/gplayweb.conf
+RUN cp /usr/local/lib/python3.6/dist-packages/root/.config/gplaycli/gplaycli.conf /etc/gplaycli/gplaycli.conf
 
 VOLUME /data/fdroid
 WORKDIR /data/fdroid

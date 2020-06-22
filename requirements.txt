@@ -1,2 +1,2 @@
+gplaycli==3.25
 tornado
-gplaycli==0.2.1

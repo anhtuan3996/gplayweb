@@ -3,6 +3,8 @@ GPlayWeb: A Web interface for GPlayCli
 
 Original work of [@matlink](https://github.com/matlink) forked to use latest versions of fdroid and gplaycli and providing a Dockerfile for easy install.
 
+For more information about gplayweb, check out [Effectively using Android without Google Play Services with gplayweb in Docker ](https://fxaguessy.fr/en/articles/2017/02/11/effectively-using-android-without-google-play-services-gplayweb-in-docker/).
+
 Docker install (gplayweb + fdroid)
 =================================
 
@@ -18,7 +20,7 @@ You can also build the container yourself
 
 Then run it
 
-    docker run --name gplayweb -p 127.0.0.1::8888:8888 gplayweb
+    docker run --name gplayweb -p 127.0.0.1:8888:8888 gplayweb
 
 To preserve gplayweb and fdroid data, mount a local folder as docker volume:
 
@@ -33,7 +35,7 @@ As a result, you can access gplayweb on localhost and the fdroid repository on y
 Installation (consider using a virtualenv)
 =========================================
 For both methods, you'll need those packages
- 		
+
 	# apt-get install python-dev python-pip libffi-dev
 
 pip method
@@ -49,12 +51,12 @@ git method
 		$ git clone https://github.com/matlink/gplayweb
 
 - Install `gplayweb` requirements with `pip` :
-	
+
 		$ pip install -r requirements.txt
 
 - Copy `gplayweb.conf.example` to `gplayweb.conf` and change the settings (you can comment unwanted lines out with #)
 - If you plan to add compatibility with F-Droid repo, ensure to uncomment the two config variables `fdroid_repo_dir` and `fdroid_exec`.
-		
+
 
 Usage
 -----
@@ -91,8 +93,8 @@ python-imaging may be needed to update FDroid repository, don't forget to instal
 * give it to gplayweb : `chown gplayweb . -R`
 * for android aapt to work, you need these packages : `apt-get install lib32stdc++6 lib32z1`
 * initialize fdroid repo : `fdroid init`
-* then in /etc/gplayweb/gplayweb.conf : 
-	
+* then in /etc/gplayweb/gplayweb.conf :
+
 	folder=/opt/fdroid/repo
 
 	fdroid_repo_dir=/opt/fdroid
